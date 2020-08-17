@@ -5,7 +5,7 @@ const PAGE_OFFSET = 0;
 
 let productController = {
   getProducts: (req, res) => {
-    Product.findAndCountAll({ offset: PAGE_OFFSET, limit: PAGE_LIMIT }).then(products => {
+    Product.findAndCountAll({ offset: PAGE_OFFSET, limit: PAGE_LIMIT, raw: true }).then(products => {
       return res.render('products', {
         products
       })
