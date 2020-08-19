@@ -1,27 +1,27 @@
-const db = require('../models')
-const nodemailer = require('nodemailer');
-const Order = db.Order
-const OrderItem = db.OrderItem
-const Cart = db.Cart
+const db = require("../models");
+const nodemailer = require("nodemailer");
+const Order = db.Order;
+const OrderItem = db.OrderItem;
+const Cart = db.Cart;
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: '',
-    pass: '',
+    user: "",
+    pass: "",
   },
 });
 
 let orderController = {
   getOrders: (req, res) => {
-    Order.findAll({ include: 'items', raw: true }).then(orders => {
-      return res.render('orders', {
-        orders
-      })
-    })
+    Order.findAll({ include: "items", raw: true }).then((orders) => {
+      return res.render("orders", {
+        orders,
+      });
+    });
   },
   postOrder: (req, res) => {
-    return Cart.findByPk(req.body.cartId, { include: 'items' }).then(cart => {
+    return Cart.findByPk(req.body.cartId, { include: "items" }).then((cart) => {
       return Order.create({
         name: req.body.name,
         address: req.body.address,
@@ -29,11 +29,10 @@ let orderController = {
         shipping_status: req.body.shipping_status,
         payment_status: req.body.payment_status,
         amount: req.body.amount,
-      }).then(order => {
-
+      }).then((order) => {
         var results = [];
         for (var i = 0; i < cart.items.length; i++) {
-          console.log(order.id, cart.items[i].id)
+          console.log(order.id, cart.items[i].id);
           results.push(
             OrderItem.create({
               OrderId: order.id,
@@ -45,8 +44,8 @@ let orderController = {
         }
 
         var mailOptions = {
-          from: '',
-          to: '',
+          from: "",
+          to: "",
           subject: `${order.id} 訂單成立`,
           text: `${order.id} 訂單成立`,
         };
@@ -55,28 +54,43 @@ let orderController = {
           if (error) {
             console.log(error);
           } else {
-            console.log('Email sent: ' + info.response);
+            console.log("Email sent: " + info.response);
           }
         });
 
-        return Promise.all(results).then(() =>
-          res.redirect('/orders')
-        );
-
-      })
-    })
+        return Promise.all(results).then(() => res.redirect("/orders"));
+      });
+    });
   },
   cancelOrder: (req, res) => {
-    return Order.findByPk(req.params.id, {}).then(order => {
-      order.update({
-        ...req.body,
-        shipping_status: '-1',
-        payment_status: '-1',
-      }).then(order => {
-        return res.redirect('back')
-      })
-    })
+    return Order.findByPk(req.params.id, {}).then((order) => {
+      order
+        .update({
+          ...req.body,
+          shipping_status: "-1",
+          payment_status: "-1",
+        })
+        .then((order) => {
+          return res.redirect("back");
+        });
+    });
   },
-}
+  getPayment: (req, res) => {
+    console.log("===== getPayment =====");
+    console.log(req.params.id);
+    console.log("==========");
 
-module.exports = orderController 
+    return Order.findByPk(req.params.id, {}).then((order) => {
+      return res.render("payment", { order: order.toJSON() });
+    });
+  },
+  spgatewayCallback: (req, res) => {
+    console.log("===== spgatewayCallback =====");
+    console.log(req.body);
+    console.log("==========");
+
+    return res.redirect("back");
+  },
+};
+
+module.exports = orderController;
