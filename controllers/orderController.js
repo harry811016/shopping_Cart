@@ -9,9 +9,13 @@ const Cart = db.Cart;
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  secure: true,
   auth: {
-    user: "",
-    pass: "",
+    type: "OAuth2",
+    user: process.env.ACCOUNT,
+    clientId: process.env.CLINENTID,
+    clientSecret: process.env.CLINENTSECRET,
+    refreshToken: process.env.REFRESHTOKEN,
   },
 });
 
@@ -138,8 +142,8 @@ let orderController = {
         }
 
         var mailOptions = {
-          from: "",
-          to: "",
+          from: process.env.ACCOUNT,
+          to: process.env.ACCOUNT,
           subject: `${order.id} 訂單成立`,
           text: `${order.id} 訂單成立`,
         };
@@ -178,7 +182,7 @@ let orderController = {
       const tradeInfo = getTradeInfo(
         order.amount,
         "產品名稱",
-        "harry811016@gmail.com"
+        process.env.ACCOUNT
       );
       console.log(tradeInfo.MerchantOrderNo);
       order
