@@ -124,11 +124,27 @@ $ sequelize db:seed:all
     - Customer 可以結帳成立訂單 (POST order)
     - 可以取消尚未出貨的訂單（POST order/:id/cancel）
 
-11. 實作訂單成立通知信
+11. 實作訂單成立通知信：nodemailer
     - 訂單成立後，Customer 會收到系統寄發的 e-mail 通知
 
 ## Implement: phase2
 
-1. 準備付款頁面
-   - /order/:id/payment
-   - /spgateway/callback
+1. 準備付款頁面: GET /order/:id/payment、POST /spgateway/callback
+
+- /order/:id/payment
+- /spgateway/callback
+
+2. 串接金流 (1): GET /order/:id/payment
+
+   - getTradeInfo - data
+   - getTradeInfo - mpg_aes_encrypt, mpg_sha_encrypt
+   - getTradeInfo - tradeInfo
+
+3. 串接金流 (2): POST /spgateway/callback
+   - /spgateway/callback?from=NotifyURL
+   - spgatewayCallback: TradeInfo
+   - spgatewayCallback: create_mpg_aes_decrypt
+   - spgatewayCallback: data
+   - /spgateway/callback?from=ReturnURL
+4. 整理環境變數：dotenv
+   - 將使用到的變數放到 .env 環境檔中
